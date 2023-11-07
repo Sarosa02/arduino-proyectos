@@ -17,6 +17,13 @@
 #include <Ethernet.h>
 #include <PubSubClient.h>
 
+#include <LiquidCrystal_I2C.h>
+#include <OneWire.h>                
+
+//Crear el objeto lcd  dirección  0x3F y 16 columnas x 2 filas
+LiquidCrystal_I2C lcd(0x3F,16,2);  
+OneWire puertosensor1(9);                //Se establece el pin 2  como bus OneWire
+
 // Update these with values suitable for your network.
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 //byte mac[]    = {  0xD8, 0xA7, 0x56, 0x31, 0x06, 0xD0 };
@@ -67,6 +74,15 @@ void setup()
   Ethernet.begin(mac, ip);
   // Allow the hardware to sort itself out
   delay(1500);
+
+  // put your setup code here, to run once:
+  Serial.print("HOLA MUNDO");
+  // Inicializar el LCD
+  lcd.init();
+  //Encender la luz de fondo.
+  lcd.backlight();
+  // Escribimos el Mensaje en el LCD.
+  lcd.print("HOLA MUNDO");
 }
 
 void loop()
