@@ -16,19 +16,17 @@
 #include <SPI.h>
 #include <Ethernet.h>
 #include <PubSubClient.h>
-
-#include <LiquidCrystal_I2C.h>
-#include <OneWire.h>                
+#include <LiquidCrystal_I2C.h>               
 
 //Crear el objeto lcd  dirección  0x3F y 16 columnas x 2 filas
 LiquidCrystal_I2C lcd(0x3F,16,2);  
-OneWire puertosensor1(9);                //Se establece el pin 2  como bus OneWire
-
 // Update these with values suitable for your network.
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 //byte mac[]    = {  0xD8, 0xA7, 0x56, 0x31, 0x06, 0xD0 };
 IPAddress ip(192,168,8,31);
 IPAddress server(192,168,8,11);
+
+long ahora,ultimamesura; //variables de tiempo
 
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived [");
@@ -68,6 +66,15 @@ void setup()
 {
   Serial.begin(57600);
 
+  // Inicializar el LCD
+  lcd.init();
+  //Encender la luz de fondo.
+  lcd.backlight();
+  // Escribimos el Mensaje en el LCD.
+  lcd.print("HOLA MUNDO");
+  
+ 
+
   client.setServer(server, 1883);
   client.setCallback(callback);
 
@@ -75,20 +82,23 @@ void setup()
   // Allow the hardware to sort itself out
   delay(1500);
 
-  // put your setup code here, to run once:
-  Serial.print("HOLA MUNDO");
-  // Inicializar el LCD
-  lcd.init();
-  //Encender la luz de fondo.
-  lcd.backlight();
-  // Escribimos el Mensaje en el LCD.
-  lcd.print("HOLA MUNDO");
 }
 
 void loop()
 {
-  if (!client.connected()) {
+  ahora=millis();
+  if ((ahora-ultimamesura)>3000) {
+    ultimamesura = ahora;
+    // Ubicamos el cursor en la primera posición(columna:0) de la segunda línea(fila:1)
+    lcd.setCursor(0, 1);
+    lcd.print(ultimamesura/1000);
+    lcd.print(" ");
+    lcd.print("s");
+    Serial.println(ultimamesura);
+  }
+    
+ /* if (!client.connected()) {
     reconnect();
   }
-  client.loop();
+  client.loop();*/
 }
