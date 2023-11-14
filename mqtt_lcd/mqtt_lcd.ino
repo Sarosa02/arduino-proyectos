@@ -17,6 +17,11 @@
 #include <Ethernet.h>
 #include <PubSubClient.h>
 #include <LiquidCrystal_I2C.h>
+#include <OneWire.h>                
+#include <DallasTemperature.h>
+
+OneWire puertosensor1(9);                //Se establece el pin 2  como bus OneWire
+DallasTemperature sensor1(&puertosensor1); //Se declara una variable u objeto para nuestro sensor
 
 //Crear el objeto lcd  dirección  0x3F y 16 columnas x 2 filas
 LiquidCrystal_I2C lcd(0x3F, 16, 2);
@@ -24,11 +29,14 @@ LiquidCrystal_I2C lcd(0x3F, 16, 2);
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 //byte mac[]    = {  0xD8, 0xA7, 0x56, 0x31, 0x06, 0xD0 };
 IPAddress ip(192, 168, 8, 31);
-IPAddress server(192, 168, 8, 11);
+IPAddress server(192, 168, 8, 10);
 
 long ahora, ultimamesura, segundero; //variables de tiempo
 
-char charTemperature3[]= "00.0";
+char charTemperature3[]= "00.00";
+char charSecons[]= "00.0";
+float temp1; //variables temperatura
+
 
 
 
@@ -94,6 +102,8 @@ void loop()
   if ((ahora - ultimamesura) > 3000) {
     ultimamesura = ahora;
     segundero = ultimamesura / 1000;
+    sensor1.requestTemperatures();   //Se envía el comando para leer la temperatura
+    temp1= sensor1.getTempCByIndex(0); //Se obtiene la temperatura en ºC  
     // Ubicamos el cursor en la primera posición(columna:0) de la segunda línea(fila:1)
     lcd.setCursor(0, 1);
     lcd.print(segundero);
@@ -101,8 +111,18 @@ void loop()
     lcd.print("s");
     Serial.println(segundero);
 
-    dtostrf(segundero,4,1, charTemperature3);
+    
+    lcd.print(" ");
+    lcd.print(temp1);
+    lcd.print(" ");
+    lcd.print("Cels");
+    Serial.println(temp1);    
+
+    dtostrf(temp1,4,2, charTemperature3);
     client.publish("TopicSara", charTemperature3);
+    
+    dtostrf(segundero,4,1, charSecons);
+   client.publish("TopicSara2", charSecons);
   }
 
    if (!client.connected()) {
