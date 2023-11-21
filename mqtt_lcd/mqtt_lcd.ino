@@ -20,6 +20,9 @@
 #include <OneWire.h>                
 #include <DallasTemperature.h>
 
+#define DISPOSITIVO "Panel4" //Dispositivo que identifica al publicar en MQTT
+#define RAIZ "cefi/fabrica"  //raiz de la ruta donde va a publicar
+
 OneWire puertosensor1(9);                //Se establece el pin 2  como bus OneWire
 DallasTemperature sensor1(&puertosensor1); //Se declara una variable u objeto para nuestro sensor
 
@@ -29,7 +32,7 @@ LiquidCrystal_I2C lcd(0x3F, 16, 2);
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 //byte mac[]    = {  0xD8, 0xA7, 0x56, 0x31, 0x06, 0xD0 };
 IPAddress ip(192, 168, 8, 31);
-IPAddress server(192, 168, 8, 10);
+IPAddress server(192, 168, 8, 11);
 
 long ahora, ultimamesura, segundero; //variables de tiempo
 
@@ -37,6 +40,10 @@ char charTemperature3[]= "00.00";
 char charSecons[]= "00.0";
 float temp1; //variables temperatura
 
+//Topics
+String topic_root =  String(RAIZ) + "/" + String(DISPOSITIVO);
+String publish_temperatura3_string = topic_root + "/temperatura1";
+const char* publish_temperatura3 = publish_temperatura3_string.c_str();
 
 
 
@@ -61,7 +68,7 @@ void reconnect() {
     if (client.connect("arduinoClient")) {
       Serial.println("connected");
       // Once connected, publish an announcement...
-      client.publish("TopicSara", "hello world");
+      client.publish("TopicSara", "hello sara");
       // ... and resubscribe
       client.subscribe("TopicSara");
     } else {
@@ -83,7 +90,7 @@ void setup()
   //Encender la luz de fondo.
   lcd.backlight();
   // Escribimos el Mensaje en el LCD.
-  lcd.print("HOLA MUNDO");
+  lcd.print("HOLA SARA");
 
 
 
@@ -119,7 +126,7 @@ void loop()
     Serial.println(temp1);    
 
     dtostrf(temp1,4,2, charTemperature3);
-    client.publish("TopicSara", charTemperature3);
+    client.publish(publish_temperatura3, charTemperature3);
     
     dtostrf(segundero,4,1, charSecons);
    client.publish("TopicSara2", charSecons);
